@@ -57,51 +57,63 @@ public class DockerPull {
             manifestInfo = getImageMainManifest(split[0], split[1], proxyUrl, proxyPort, token,
                 null);
         }
-        JSONArray manifests = manifestInfo.getJSONArray("manifests");
-        log.info("choose one");
-        for (int i = 0; i < manifests.size(); i++) {
-            JSONObject manifest = (JSONObject) manifests.get(i);
-            JSONObject platform = manifest.getJSONObject("platform");
-            String logInfo = String.format("[%d] architecture: %s, os: %s, size: %d",
-                i, platform.getString("architecture"), platform.getString("os"),
-                manifest.getLong("size"));
-            log.info(logInfo);
-        }
-        int choose = -1;
-        Scanner scanner = new Scanner(System.in);
-        while (choose == -1) {
-            String line = scanner.nextLine();
-            int input = Integer.parseInt(line);
-            if (input >= manifests.size() || input < 0) {
-                log.info("choose again");
-            } else {
-                choose = input;
-            }
-        }
 
-        JSONObject manifest = (JSONObject) manifests.get(choose);
-        JSONObject config;
+        JSONObject config = getConfig(manifestInfo, image, proxyUrl, proxyPort, token);
 
-        log.info("get manifest...");
-        if (!image.contains(IMG_TAG_SPLIT)) {
-            config = getImageMainManifest(image, manifest.getString(DIGEST_FLAG), proxyUrl, proxyPort,
-                token,
-                manifest.getString("mediaType"));
-        } else {
-            String[] split = image.split(IMG_TAG_SPLIT);
-            config = getImageMainManifest(split[0], manifest.getString(DIGEST_FLAG), proxyUrl,
-                proxyPort, token,
-                manifest.getString("mediaType"));
-        }
-        log.info("done");
         JSONArray layers = config.getJSONArray("layers");
         for (int i = 0; i < layers.size(); i++) {
             JSONObject layer = (JSONObject) layers.get(i);
             downloadLayerStream(proxyUrl, proxyPort, token, image, layer.getString(DIGEST_FLAG),
                 layers.size(), i);
         }
-        ImageTar.downloadAndCreateDockerImageTar(image, layers, config, proxyUrl, proxyPort, token,
-            manifest.getString(DIGEST_FLAG));
+        ImageTar.downloadAndCreateDockerImageTar(image, layers, config, proxyUrl, proxyPort, token);
+
+    }
+
+    private static JSONObject getConfig(JSONObject manifestInfo, String image, String proxyUrl, Integer proxyPort, String token)
+        throws IOException, InterruptedException {
+        JSONObject config;
+        if (manifestInfo.getJSONArray("manifests") != null){
+            JSONArray manifests = manifestInfo.getJSONArray("manifests");
+            log.info("choose one");
+            for (int i = 0; i < manifests.size(); i++) {
+                JSONObject manifest = (JSONObject) manifests.get(i);
+                JSONObject platform = manifest.getJSONObject("platform");
+                String logInfo = String.format("[%d] architecture: %s, os: %s, size: %d",
+                    i, platform.getString("architecture"), platform.getString("os"),
+                    manifest.getLong("size"));
+                log.info(logInfo);
+            }
+            int choose = -1;
+            Scanner scanner = new Scanner(System.in);
+            while (choose == -1) {
+                String line = scanner.nextLine();
+                int input = Integer.parseInt(line);
+                if (input >= manifests.size() || input < 0) {
+                    log.info("choose again");
+                } else {
+                    choose = input;
+                }
+            }
+            JSONObject manifest = (JSONObject) manifests.get(choose);
+
+            log.info("get manifest config...");
+            if (!image.contains(IMG_TAG_SPLIT)) {
+                config = getImageMainManifest(image, manifest.getString(DIGEST_FLAG), proxyUrl, proxyPort,
+                    token,
+                    manifest.getString("mediaType"));
+            } else {
+                String[] split = image.split(IMG_TAG_SPLIT);
+                config = getImageMainManifest(split[0], manifest.getString(DIGEST_FLAG), proxyUrl,
+                    proxyPort, token,
+                    manifest.getString("mediaType"));
+            }
+            log.info("done");
+            return config;
+        }else {
+            return manifestInfo;
+        }
+
 
     }
 

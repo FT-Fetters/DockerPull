@@ -43,7 +43,7 @@ public class ImageTar {
     }
 
     public static void downloadAndCreateDockerImageTar(String imageName, JSONArray layers,
-        JSONObject config, String proxyUrl, Integer proxyPort, String token, String imageDigest)
+        JSONObject config, String proxyUrl, Integer proxyPort, String token)
         throws IOException, InterruptedException {
         // 下载配置文件
         String configDigest = config.getJSONObject("config").getString(DIGEST_FLAG);
@@ -72,7 +72,7 @@ public class ImageTar {
             addFileToTar(to, manifestPath.toFile(), "manifest.json");
 
             // 添加repositories
-            String repositoriesContent = createRepositoriesContent(imageName, imageDigest);
+            String repositoriesContent = createRepositoriesContent(imageName);
             Path repositoriesPath = Paths.get("repositories");
             Files.writeString(repositoriesPath, repositoriesContent);
             addFileToTar(to, repositoriesPath.toFile(), "repositories");
@@ -116,14 +116,14 @@ public class ImageTar {
         return arr.toJSONString();
     }
 
-    private static String createRepositoriesContent(String imageName, String digest) {
+    private static String createRepositoriesContent(String imageName) {
         // 构建repositories文件内容
         // 返回字符串
         JSONObject repositories = new JSONObject();
-        JSONObject body = new JSONObject();
-        body.put(imageName.split(IMG_TAG_SPLIT)[1],
-            digest.split(IMG_TAG_SPLIT)[1]);
-        repositories.put(imageName.split(IMG_TAG_SPLIT)[0], body);
+//        JSONObject body = new JSONObject();
+//        body.put(imageName.split(IMG_TAG_SPLIT)[0],
+//            imageName.split(IMG_TAG_SPLIT)[1]);
+        repositories.put(imageName.split(IMG_TAG_SPLIT)[0], imageName.split(IMG_TAG_SPLIT)[1]);
         return repositories.toJSONString();
     }
 
