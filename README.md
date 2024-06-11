@@ -13,6 +13,8 @@ After the download and packaging are complete, you can find the downloaded image
 
 ## Docker
 
+The extracted image is by default ending with .gz, and it needs to be changed to end with .tar.
+
 ```shell
 # example: image file name 'nginx_latest.tar'
 docker load < nginx_latest.tar
