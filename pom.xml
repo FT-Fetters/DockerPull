@@ -6,7 +6,7 @@
 
   <groupId>xyz.ldqc</groupId>
   <artifactId>DockerPull</artifactId>
-  <version>test</version>
+  <version>1.0</version>
 
   <properties>
     <maven.compiler.source>11</maven.compiler.source>
