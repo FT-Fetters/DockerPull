@@ -22,5 +22,5 @@ docker load < nginx_latest.tar
 
 ## License
 
-MIT © [Fetters](https://github.com/FT-Fetters/DockerPull/blob/master/LICENSE)
+MIT © [Fetters](LICENSE)
 
