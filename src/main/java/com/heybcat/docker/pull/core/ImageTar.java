@@ -64,18 +64,21 @@ public class ImageTar {
                 new File("").getAbsolutePath() + DOWNLOAD_TMP + configDigest.split(IMG_TAG_SPLIT)[1]
                     + ".json");
             addFileToTar(to, configPath.toFile(), configDigest.split(IMG_TAG_SPLIT)[1] + ".json");
+            log.info("add {}.json to tar file", configDigest.split(IMG_TAG_SPLIT)[1]);
 
             // 添加manifest.json
             String manifestJson = createManifestJson(imageName, layers, configDigest);
             Path manifestPath = Paths.get("manifest.json");
             Files.writeString(manifestPath, manifestJson);
             addFileToTar(to, manifestPath.toFile(), "manifest.json");
+            log.info("add manifest.json to tar file");
 
             // 添加repositories
             String repositoriesContent = createRepositoriesContent(imageName);
             Path repositoriesPath = Paths.get("repositories");
             Files.writeString(repositoriesPath, repositoriesContent);
             addFileToTar(to, repositoriesPath.toFile(), "repositories");
+            log.info("add repositories to tar file");
 
             // 添加层文件
             for (Object o : layers) {
@@ -86,6 +89,7 @@ public class ImageTar {
                 if (Files.exists(layerPath)) {
                     addFileToTar(to, layerPath.toFile(),
                         layer.getString(DIGEST_FLAG).split(IMG_TAG_SPLIT)[1] + "/layer.tar");
+                    log.info("add {} layer.tar to tar file", layer.getString(DIGEST_FLAG));
                 }
             }
 
