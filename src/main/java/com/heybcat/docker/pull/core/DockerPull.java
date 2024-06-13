@@ -51,12 +51,11 @@ public class DockerPull {
         }
         JSONObject manifestInfo;
         if (!image.contains(IMG_TAG_SPLIT)) {
-            manifestInfo = getImageMainManifest(image, LATEST, proxyUrl, proxyPort, token, null);
-        } else {
-            String[] split = image.split(IMG_TAG_SPLIT);
-            manifestInfo = getImageMainManifest(split[0], split[1], proxyUrl, proxyPort, token,
-                null);
+            image = image + IMG_TAG_SPLIT + LATEST;
         }
+        String[] split = image.split(IMG_TAG_SPLIT);
+        manifestInfo = getImageMainManifest(split[0], split[1], proxyUrl, proxyPort, token,
+            null);
 
         JSONObject config = getConfig(manifestInfo, image, proxyUrl, proxyPort, token);
 
@@ -160,6 +159,11 @@ public class DockerPull {
             Path path = Paths.get(
                 new File("").getAbsolutePath() + DOWNLOAD_TMP + layerDigest.split(IMG_TAG_SPLIT)[1]
                     + ".tar");
+            File tarFile = path.toFile();
+            if (tarFile.exists() && tarFile.length() == contentLength) {
+                log.info("{}.tar file exist, use local file", layerDigest.split(IMG_TAG_SPLIT)[1]);
+                return;
+            }
             Files.createDirectories(path.getParent());
             try (InputStream inputStream = response.body();
                 OutputStream outputStream = Files.newOutputStream(path, StandardOpenOption.CREATE,
