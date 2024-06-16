@@ -57,6 +57,11 @@ public class DockerPull {
         manifestInfo = getImageMainManifest(split[0], split[1], proxyUrl, proxyPort, token,
             null);
 
+        if (manifestInfo.containsKey("errors")){
+            log.error("{}", manifestInfo.getJSONArray("errors"));
+            return;
+        }
+
         JSONObject config = getConfig(manifestInfo, image, proxyUrl, proxyPort, token);
 
         JSONArray layers = config.getJSONArray("layers");
