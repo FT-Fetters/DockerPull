@@ -1,2 +1,5 @@
 server:
   port: 1111
+  resource:
+    enable: true
+    path: /web
