@@ -5,6 +5,7 @@ import com.heybcat.docker.pull.session.PullSessionManager.PullSession;
 import com.heybcat.docker.pull.web.entity.ApiResponse;
 import com.heybcat.docker.pull.web.service.DockerImageService;
 import com.heybcat.tightlyweb.common.ioc.annotation.Cat;
+import com.heybcat.tightlyweb.common.ioc.annotation.Inject;
 import com.heybcat.tightlyweb.http.annotation.WebEndpoint;
 import com.heybcat.tightlyweb.http.annotation.WebMapping;
 import xyz.ldqc.tightcall.util.StringUtil;
@@ -19,6 +20,7 @@ public class ImageApi {
 
     private final DockerImageService dockerImageService;
 
+    @Inject
     public ImageApi(DockerImageService dockerImageService) {
         this.dockerImageService = dockerImageService;
     }
