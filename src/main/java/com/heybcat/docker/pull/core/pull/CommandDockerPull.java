@@ -1,7 +1,10 @@
-package com.heybcat.docker.pull.core;
+package com.heybcat.docker.pull.core.pull;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.heybcat.docker.pull.core.ClientBuilder;
+import com.heybcat.docker.pull.core.DockerAuth;
+import com.heybcat.docker.pull.core.ImageTar;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +27,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Fetters
  */
-public class DockerPull {
+public class CommandDockerPull {
 
     private static final String IMG_TAG_SPLIT = ":";
 
@@ -32,11 +35,11 @@ public class DockerPull {
 
     private static final int SUCCESS_CODE = 200;
 
-    private static final Logger log = LoggerFactory.getLogger(DockerPull.class);
+    private static final Logger log = LoggerFactory.getLogger(CommandDockerPull.class);
     private static final String DIGEST_FLAG = "digest";
     public static final String DOWNLOAD_TMP = "/download_tmp/";
 
-    private DockerPull() {
+    private CommandDockerPull() {
 
     }
 
