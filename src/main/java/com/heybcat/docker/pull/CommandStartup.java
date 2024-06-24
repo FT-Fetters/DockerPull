@@ -1,6 +1,6 @@
 package com.heybcat.docker.pull;
 
-import com.heybcat.docker.pull.core.DockerPull;
+import com.heybcat.docker.pull.core.pull.CommandDockerPull;
 import com.heybcat.docker.pull.web.DockerPullWebApplication;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -27,7 +27,7 @@ public class CommandStartup {
         }
 
         if (args.length == 3) {
-            DockerPull.pull(args[0], args[1], Integer.parseInt(args[2]));
+            CommandDockerPull.pull(args[0], args[1], Integer.parseInt(args[2]));
             return;
         }
 
@@ -35,7 +35,7 @@ public class CommandStartup {
             if (WEB_FLAG.equals(args[0])) {
                 DockerPullWebApplication.run();
             } else {
-                DockerPull.pull(args[0], null, null);
+                CommandDockerPull.pull(args[0], null, null);
             }
             return;
         }
