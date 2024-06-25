@@ -93,6 +93,7 @@ public class BaseDockerPull {
             JSONObject manifests = getImageMainManifestByDefault(namespace, image, tag,
                 proxyUrl, proxyPort, token, null);
             if (manifests.containsKey(ERROR_FLAG)) {
+                PullSessionManager.getInstance().changeStatus(session, "error");
                 return new PullResult(false, manifests.getJSONArray(ERROR_FLAG).toJSONString());
             }
 
