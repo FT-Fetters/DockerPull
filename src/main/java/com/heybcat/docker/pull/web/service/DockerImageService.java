@@ -26,7 +26,8 @@ public class DockerImageService {
         threadPoolExecutor.execute(
             () -> BaseDockerPull.pull(null, namespace, image, tag, os, arch,
                 GlobalConfig.getProxyHost(),
-                Integer.valueOf(GlobalConfig.getProxyPort()), session)
+                GlobalConfig.getProxyPort() != null ? Integer.valueOf(GlobalConfig.getProxyPort())
+                    : null, session)
         );
         return session;
     }
