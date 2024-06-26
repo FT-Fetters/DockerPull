@@ -3,3 +3,5 @@ server:
   resource:
     enable: true
     path: /web
+  web:
+    redirect: /web/->/web/index.html
