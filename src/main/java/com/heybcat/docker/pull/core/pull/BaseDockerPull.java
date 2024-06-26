@@ -102,6 +102,12 @@ public class BaseDockerPull {
             JSONObject config =
                 manifests.containsKey("manifests") ? getConfig(manifests, namespace, image,
                     proxyUrl, proxyPort, token, os, arch) : manifests;
+
+            if (config == null){
+                PullSessionManager.getInstance().changeStatus(session, "error");
+                PullSessionManager.getInstance().setResult(session, "unknown config");
+                return new PullResult(false, "unknown config");
+            }
             PullSessionManager.getInstance().changeStatus(session, "download_config");
 
             String configDigest = config.getJSONObject("config").getString("digest");
