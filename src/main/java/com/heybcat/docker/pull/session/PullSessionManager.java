@@ -66,12 +66,20 @@ public class PullSessionManager {
         }
     }
 
+    public void setResult(String session, String result){
+        PullSession pullSession = sessionMap.get(session);
+        if (pullSession != null) {
+            pullSession.result = result;
+        }
+    }
+
     public static class PullSession {
 
         public PullSession(String session){
             this.session = session;
             this.progress = 0;
             this.status = "";
+            this.result = null;
         }
 
         private String session;
@@ -79,6 +87,8 @@ public class PullSessionManager {
         private double progress;
 
         private String status;
+
+        private String result;
 
         public String getSession() {
             return session;
@@ -90,6 +100,10 @@ public class PullSessionManager {
 
         public String getStatus() {
             return status;
+        }
+
+        public String getResult() {
+            return result;
         }
     }
 

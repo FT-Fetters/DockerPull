@@ -94,6 +94,7 @@ public class BaseDockerPull {
                 proxyUrl, proxyPort, token, null);
             if (manifests.containsKey(ERROR_FLAG)) {
                 PullSessionManager.getInstance().changeStatus(session, "error");
+                PullSessionManager.getInstance().setResult(session, manifests.toJSONString());
                 return new PullResult(false, manifests.getJSONArray(ERROR_FLAG).toJSONString());
             }
 
@@ -105,12 +106,13 @@ public class BaseDockerPull {
 
             String configDigest = config.getJSONObject("config").getString("digest");
 
-            downloadConfigFile(namespace, image, configDigest, proxyUrl, proxyPort, token);
+            downloadConfigFile(namespace, image, configDigest, proxyUrl, proxyPort, token, session);
 
             JSONArray layers = config.getJSONArray("layers");
 
             int totalSize = getTotalSize(layers);
-            downloadLayers(proxyUrl, proxyPort, token, namespace, image, session, layers, totalSize);
+            downloadLayers(proxyUrl, proxyPort, token, namespace, image, session, layers,
+                totalSize);
             PullSessionManager.getInstance().changeStatus(session, "package_image");
             ImagePackager.packImage(namespace, image, tag, layers, config);
             PullSessionManager.getInstance().changeStatus(session, "finished");
@@ -172,7 +174,7 @@ public class BaseDockerPull {
 
     private static void downloadConfigFile(String namespace, String image, String configDigest,
         String proxyUrl,
-        Integer proxyPort, String token) throws IOException, InterruptedException {
+        Integer proxyPort, String token, String session) throws IOException, InterruptedException {
         // 实现配置文件的下载逻辑
         // 将下载的配置文件保存到download_tmp目录
         String url = "https://registry-1.docker.io/v2/" + namespace + SPLIT_CHAR + image + "/blobs/"
@@ -182,6 +184,8 @@ public class BaseDockerPull {
             .header("Authorization", "Bearer " + token).build();
         HttpResponse<String> response = httpClient.send(request, BodyHandlers.ofString());
         if (response.statusCode() != 200) {
+            PullSessionManager.getInstance().changeStatus(session, "error");
+            PullSessionManager.getInstance().setResult(session, "config download fail");
             log.error("Failed to download config file");
             return;
         }
@@ -226,7 +230,8 @@ public class BaseDockerPull {
                     return;
                 }
                 Path path = Paths.get(
-                    new File("").getAbsolutePath() + DOWNLOAD_TMP + layerDigest.split(":")[1] + ".tar");
+                    new File("").getAbsolutePath() + DOWNLOAD_TMP + layerDigest.split(":")[1]
+                        + ".tar");
                 File tarFile = path.toFile();
                 if (tarFile.exists() && tarFile.length() == contentLength) {
                     log.info("{}.tar file exist, use local file", layerDigest.split(":")[1]);
@@ -251,13 +256,16 @@ public class BaseDockerPull {
                         double progress = (double) bytesReadTotal / totalSize * 100;
                         logProgress(progress, layers.size(), i, totalSize, bytesReadTotal, session);
                     }
+                    PullSessionManager.getInstance()
+                        .setResult(session, path.toAbsolutePath().toString());
                     log.info("File downloaded successfully to {}", path.toAbsolutePath());
                 }
             }
         }
     }
 
-    private static void logProgress(double progress, int all, int cur, long allBytes, long curBytes, String session) {
+    private static void logProgress(double progress, int all, int cur, long allBytes, long curBytes,
+        String session) {
         // log progress like: [#####     ]
         int progressBarWidth = 25;
         StringBuilder progressBar = new StringBuilder();
@@ -270,8 +278,9 @@ public class BaseDockerPull {
         }
         String progressFormat = String.format("%.2f", progress);
         PullSessionManager.getInstance().updateProgress(session, progress);
-        if (PullSessionManager.getInstance().getSession(session) == null){
-            log.info("[{}] {}% {}/{} {}kb/{}kb", progressBar, progressFormat, cur + 1, all, curBytes / 1024, allBytes / 1024);
+        if (PullSessionManager.getInstance().getSession(session) == null) {
+            log.info("[{}] {}% {}/{} {}kb/{}kb", progressBar, progressFormat, cur + 1, all,
+                curBytes / 1024, allBytes / 1024);
         }
     }
 }
