@@ -4,4 +4,4 @@ server:
     enable: true
     path: /web
   web:
-    redirect: /web/->/web/index.html
+    redirect: /->/web/index.html
