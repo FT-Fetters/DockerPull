@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.heybcat.docker.pull.core.ClientBuilder;
 import com.heybcat.docker.pull.core.DockerAuth;
 import com.heybcat.docker.pull.core.ImagePackager;
-import com.heybcat.docker.pull.session.PullSessionManager;
+import com.heybcat.docker.pull.session.SessionManager;
 import com.heybcat.docker.pull.web.entity.PullResult;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -89,26 +89,26 @@ public class BaseDockerPull {
         try {
             String token = DockerAuth.token(namespace + SPLIT_CHAR + image, proxyUrl, proxyPort);
 
-            PullSessionManager.getInstance().changeStatus(session, "waiting");
+            SessionManager.getInstance().changeStatus(session, "waiting");
             JSONObject manifests = getImageMainManifestByDefault(namespace, image, tag,
                 proxyUrl, proxyPort, token, null);
             if (manifests.containsKey(ERROR_FLAG)) {
-                PullSessionManager.getInstance().changeStatus(session, "error");
-                PullSessionManager.getInstance().setResult(session, manifests.toJSONString());
+                SessionManager.getInstance().changeStatus(session, "error");
+                SessionManager.getInstance().setResult(session, manifests.toJSONString());
                 return new PullResult(false, manifests.getJSONArray(ERROR_FLAG).toJSONString());
             }
 
-            PullSessionManager.getInstance().changeStatus(session, "find_config");
+            SessionManager.getInstance().changeStatus(session, "find_config");
             JSONObject config =
                 manifests.containsKey("manifests") ? getConfig(manifests, namespace, image,
                     proxyUrl, proxyPort, token, os, arch) : manifests;
 
             if (config == null){
-                PullSessionManager.getInstance().changeStatus(session, "error");
-                PullSessionManager.getInstance().setResult(session, "unknown config");
+                SessionManager.getInstance().changeStatus(session, "error");
+                SessionManager.getInstance().setResult(session, "unknown config");
                 return new PullResult(false, "unknown config");
             }
-            PullSessionManager.getInstance().changeStatus(session, "download_config");
+            SessionManager.getInstance().changeStatus(session, "download_config");
 
             String configDigest = config.getJSONObject("config").getString("digest");
 
@@ -119,9 +119,9 @@ public class BaseDockerPull {
             int totalSize = getTotalSize(layers);
             downloadLayers(proxyUrl, proxyPort, token, namespace, image, session, layers,
                 totalSize);
-            PullSessionManager.getInstance().changeStatus(session, "package_image");
+            SessionManager.getInstance().changeStatus(session, "package_image");
             ImagePackager.packImage(namespace, image, tag, layers, config);
-            PullSessionManager.getInstance().changeStatus(session, "finished");
+            SessionManager.getInstance().changeStatus(session, "finished");
         } catch (URISyntaxException | IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
             return new PullResult(false, e.getMessage());
@@ -190,8 +190,8 @@ public class BaseDockerPull {
             .header("Authorization", "Bearer " + token).build();
         HttpResponse<String> response = httpClient.send(request, BodyHandlers.ofString());
         if (response.statusCode() != 200) {
-            PullSessionManager.getInstance().changeStatus(session, "error");
-            PullSessionManager.getInstance().setResult(session, "config download fail");
+            SessionManager.getInstance().changeStatus(session, "error");
+            SessionManager.getInstance().setResult(session, "config download fail");
             log.error("Failed to download config file");
             return;
         }
@@ -216,7 +216,7 @@ public class BaseDockerPull {
         String namespace, String image, String session, JSONArray layers, long totalSize)
         throws IOException, InterruptedException {
         long bytesReadTotal = 0;
-        PullSessionManager.getInstance().changeStatus(session, "download_layers");
+        SessionManager.getInstance().changeStatus(session, "download_layers");
         for (int i = 0; i < layers.size(); i++) {
             JSONObject layer = layers.getJSONObject(i);
             String layerDigest = layer.getString("digest");
@@ -262,7 +262,7 @@ public class BaseDockerPull {
                         double progress = (double) bytesReadTotal / totalSize * 100;
                         logProgress(progress, layers.size(), i, totalSize, bytesReadTotal, session);
                     }
-                    PullSessionManager.getInstance()
+                    SessionManager.getInstance()
                         .setResult(session, path.toAbsolutePath().toString());
                     log.info("File downloaded successfully to {}", path.toAbsolutePath());
                 }
@@ -283,8 +283,8 @@ public class BaseDockerPull {
             }
         }
         String progressFormat = String.format("%.2f", progress);
-        PullSessionManager.getInstance().updateProgress(session, progress);
-        if (PullSessionManager.getInstance().getSession(session) == null) {
+        SessionManager.getInstance().updateProgress(session, progress);
+        if (SessionManager.getInstance().getSession(session) == null) {
             log.info("[{}] {}% {}/{} {}kb/{}kb", progressBar, progressFormat, cur + 1, all,
                 curBytes / 1024, allBytes / 1024);
         }
