@@ -1,0 +1,7 @@
+proxyHost:127.0.0.1
+proxyPort:7890
+sshHost:111.111.111.111
+sshPort:22
+sshUser:root
+sshPassword:123456
+sshSavePath:/home
