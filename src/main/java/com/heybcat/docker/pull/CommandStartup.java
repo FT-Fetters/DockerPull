@@ -1,8 +1,10 @@
 package com.heybcat.docker.pull;
 
+import com.heybcat.docker.pull.core.ConfigManager;
 import com.heybcat.docker.pull.core.pull.CommandDockerPull;
 import com.heybcat.docker.pull.web.DockerPullWebApplication;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.logging.Logger;
 
@@ -15,7 +17,8 @@ public class CommandStartup {
     static Logger log = Logger.getLogger(CommandStartup.class.getName());
 
     public static void main(String[] args)
-        throws URISyntaxException, IOException, InterruptedException {
+        throws URISyntaxException, IOException, InterruptedException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        ConfigManager.load();
         handleCommand(args);
     }
 
