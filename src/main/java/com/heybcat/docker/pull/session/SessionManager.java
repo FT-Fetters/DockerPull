@@ -7,9 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Fetters
  */
-public class PullSessionManager {
+public class SessionManager {
 
-    private static final PullSessionManager INSTANCE = new PullSessionManager();
+    private static final SessionManager INSTANCE = new SessionManager();
 
     private static final int SESSION_LEN = 16;
 
@@ -17,12 +17,12 @@ public class PullSessionManager {
 
     private final Random random;
 
-    private PullSessionManager() {
+    private SessionManager() {
         sessionMap = new ConcurrentHashMap<>();
         random = new Random(System.currentTimeMillis());
     }
 
-    public static PullSessionManager getInstance() {
+    public static SessionManager getInstance() {
         return INSTANCE;
     }
 
