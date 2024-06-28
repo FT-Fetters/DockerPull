@@ -1,8 +1,10 @@
 package com.heybcat.docker.pull.web.api;
 
-import com.heybcat.docker.pull.session.PullSessionManager;
-import com.heybcat.docker.pull.session.PullSessionManager.PullSession;
+import com.heybcat.docker.pull.session.SessionManager;
+import com.heybcat.docker.pull.session.SessionManager.PullSession;
 import com.heybcat.docker.pull.web.entity.ApiResponse;
+import com.heybcat.docker.pull.web.entity.view.LocalImagesView;
+import com.heybcat.docker.pull.web.entity.view.UploadImageView;
 import com.heybcat.docker.pull.web.service.DockerImageService;
 import com.heybcat.tightlyweb.common.ioc.annotation.Cat;
 import com.heybcat.tightlyweb.common.ioc.annotation.Inject;
@@ -41,12 +43,42 @@ public class ImageApi {
         return ApiResponse.success(session);
     }
 
-    @WebMapping("/pull/status")
+    @WebMapping("/session/status")
     public ApiResponse<PullSession> pullStatus(String session) {
-        PullSession pullSession = PullSessionManager.getInstance().getSession(session);
+        PullSession pullSession = SessionManager.getInstance().getSession(session);
         if (pullSession == null){
             return ApiResponse.fail("session not found");
         }
         return ApiResponse.success(pullSession);
+    }
+
+    /**
+     * get local images
+     * @param cur cur page num
+     * @param size cur page size
+     * @param keyword file keyword
+     * @param order ASC or DESC
+     * @param orderBy time or size
+     */
+    @WebMapping("/local/images")
+    public ApiResponse<LocalImagesView> localImages(Integer cur, Integer size, String keyword, String order, String orderBy){
+        cur = cur == null ? 1 : cur;
+        size = size == null ? 10 : size;
+        return ApiResponse.success(dockerImageService.localImages(cur, size, keyword, order, orderBy));
+    }
+
+    /**
+     * delete local image
+     * @param fileName image file name
+     */
+    @WebMapping("/local/images/delete")
+    public ApiResponse<String> deleteImage(String fileName){
+        return ApiResponse.success(dockerImageService.deleteImage(fileName));
+    }
+
+
+    @WebMapping("/local/images/upload")
+    public ApiResponse<UploadImageView> uploadImage(String fileName){
+        return ApiResponse.success(dockerImageService.uploadImage(fileName));
     }
 }
