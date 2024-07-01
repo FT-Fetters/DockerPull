@@ -71,12 +71,14 @@ public class SftpUploader {
                             double percent = ((double) transferred * 100) / fileSize;
                             SessionManager.getInstance().updateProgress(session, percent);
                             SessionManager.getInstance().changeStatus(session, "uploading");
+                            log.info("upload image {} to server {} path {} progress {}%", imageFile.getName(), sshHost, targetPath, percent);
                             return true;
                         }
 
                         @Override
                         public void end() {
                             SessionManager.getInstance().changeStatus(session, "finished");
+                            log.info("upload image {} to server {} path {} finished", imageFile.getName(), sshHost, targetPath);
                         }
                     });
                 } catch (JSchException | SftpException | IOException e) {

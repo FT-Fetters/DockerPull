@@ -1,5 +1,5 @@
 import com.heybcat.docker.pull.core.pull.BaseDockerPull;
-import com.heybcat.docker.pull.session.PullSessionManager;
+import com.heybcat.docker.pull.session.SessionManager;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,15 +10,15 @@ class BaseDockerPullTest {
 
     @Test
     void test() {
-        String session = PullSessionManager.getInstance().newSession();
+        String session = SessionManager.getInstance().newSession();
         new Thread(() -> BaseDockerPull.pull(null, "library", "nginx",
             "latest", "linux", "amd64", "127.0.0.1", 7890,
             session)).start();
-        while (!PullSessionManager.getInstance().getSession(session).getStatus()
+        while (!SessionManager.getInstance().getSession(session).getStatus()
             .equals("finished")) {
             log.info("status: {} progress: {}",
-                PullSessionManager.getInstance().getSession(session).getStatus(),
-                PullSessionManager.getInstance().getSession(session).getProgress());
+                SessionManager.getInstance().getSession(session).getStatus(),
+                SessionManager.getInstance().getSession(session).getProgress());
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
