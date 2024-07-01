@@ -50,6 +50,10 @@ public class DockerImageService {
     public LocalImagesView localImages(Integer cur, Integer size, String keyword, String order, String orderBy) {
         LocalImagesView localImagesView = new LocalImagesView();
         Path imagesPath = Paths.get(new File("").getAbsolutePath() + "/images/");
+        if (!imagesPath.toFile().exists()){
+            localImagesView.setTotal(0);
+            return localImagesView;
+        }
         List<File> files = FileUtil.listAllFilesInDir(imagesPath.toAbsolutePath().toString());
         if (StringUtil.isNotBlank(keyword)) {
             files = files.stream().filter(file -> file.getName().contains(keyword)).collect(Collectors.toList());
