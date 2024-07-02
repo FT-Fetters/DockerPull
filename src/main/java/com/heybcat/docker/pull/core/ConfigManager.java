@@ -9,8 +9,10 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,6 +61,34 @@ public class ConfigManager {
             Method method = ReflectionUtil.setterMethod(GlobalConfig.class, declaredField);
             method.invoke(GlobalConfig.class, value);
         }
+    }
+
+    public static void save()
+        throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Path runPath = Paths.get(new File("").getAbsolutePath());
+        File configFile = new File(runPath.toAbsolutePath() + "/config");
+        if (!configFile.exists()) {
+            Files.createFile(configFile.toPath());
+        }
+        StringBuilder configFileContent = new StringBuilder();
+        Field[] declaredFields = GlobalConfig.class.getDeclaredFields();
+        for (Field declaredField : declaredFields) {
+            Config config = declaredField.getAnnotation(Config.class);
+            if (config == null){
+                continue;
+            }
+            String key = config.value();
+            String value = (String) ReflectionUtil.getterMethod(GlobalConfig.class, declaredField.getName()).invoke(GlobalConfig.class);
+            if (value == null){
+                continue;
+            }
+            configFileContent.append(key).append(":").append(value).append("\n");
+        }
+        Files.writeString(
+            configFile.toPath(),
+            configFileContent.toString(),
+            StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING
+        );
     }
 
 }
