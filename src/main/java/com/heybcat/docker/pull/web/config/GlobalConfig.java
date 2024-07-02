@@ -1,9 +1,15 @@
 package com.heybcat.docker.pull.web.config;
 
+import com.heybcat.docker.pull.util.CryptoUtil;
+
 /**
  * @author Fetters
  */
 public class GlobalConfig {
+
+    private GlobalConfig(){
+
+    }
 
     @Config("proxyHost")
     private static String proxyHost;
@@ -67,11 +73,19 @@ public class GlobalConfig {
     }
 
     public static String getSshPassword() {
-        return sshPassword;
+        if (sshPassword.matches("^[_+]+$")){
+            return CryptoUtil.moduloEncrypt(sshPassword);
+        }else {
+            return sshPassword;
+        }
     }
 
     public static void setSshPassword(String sshPassword) {
-        GlobalConfig.sshPassword = sshPassword;
+        if (sshPassword.matches("^[_+]+$")) {
+            GlobalConfig.sshPassword = CryptoUtil.moduloDecrypt(sshPassword);
+        }else {
+            GlobalConfig.sshPassword = sshPassword;
+        }
     }
 
     public static String getSshSavePath() {
