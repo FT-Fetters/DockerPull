@@ -1,6 +1,7 @@
 package com.heybcat.docker.pull.core.sftp;
 
 import com.heybcat.docker.pull.session.SessionManager;
+import com.heybcat.docker.pull.util.CryptoUtil;
 import com.heybcat.docker.pull.web.config.GlobalConfig;
 import com.heybcat.docker.pull.web.entity.view.UploadImageView;
 import com.jcraft.jsch.Channel;
@@ -39,7 +40,7 @@ public class SftpUploader {
         String sshHost = GlobalConfig.getSshHost();
         String sshPort = GlobalConfig.getSshPort();
         String sshUser = GlobalConfig.getSshUser();
-        String sshPassword = GlobalConfig.getSshPassword();
+        String sshPassword = CryptoUtil.moduloDecrypt(GlobalConfig.getSshPassword());
         if (StringUtil.isAnyBlank(sshHost, sshUser, sshPassword)){
             return UploadImageView.fail("missing config");
         }
