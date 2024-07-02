@@ -74,9 +74,10 @@ public class GlobalConfig {
 
     public static String getSshPassword() {
         if (sshPassword.matches("^[_+]+$")){
-            return CryptoUtil.moduloEncrypt(sshPassword);
-        }else {
             return sshPassword;
+
+        }else {
+            return CryptoUtil.moduloEncrypt(sshPassword);
         }
     }
 
