@@ -42,7 +42,7 @@ public class CryptoUtil {
 
     public static String moduloDecrypt(String ciphertext) {
         if (!ciphertext.matches("^[_+]+$")) {
-            return "";
+            return ciphertext;
         }
 
         char[] charArray = ciphertext.toCharArray();
