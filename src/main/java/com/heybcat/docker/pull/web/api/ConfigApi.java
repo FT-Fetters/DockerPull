@@ -27,7 +27,7 @@ public class ConfigApi {
         GlobalConfig.setSshHost(sshHost);
         GlobalConfig.setSshPort(sshPort);
         GlobalConfig.setSshUser(sshUser);
-        GlobalConfig.setSshPassword(CryptoUtil.moduloDecrypt(sshPassword));
+        GlobalConfig.setSshPassword(sshPassword);
         GlobalConfig.setSshSavePath(sshSavePath);
         return ApiResponse.success();
     }
