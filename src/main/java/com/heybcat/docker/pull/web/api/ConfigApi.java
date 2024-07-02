@@ -1,5 +1,6 @@
 package com.heybcat.docker.pull.web.api;
 
+import com.heybcat.docker.pull.util.CryptoUtil;
 import com.heybcat.docker.pull.web.config.GlobalConfig;
 import com.heybcat.docker.pull.web.entity.ApiResponse;
 import com.heybcat.tightlyweb.common.ioc.annotation.Cat;
@@ -18,6 +19,16 @@ public class ConfigApi {
     public ApiResponse<String> setProxy(String proxyHost, String proxyPort){
         GlobalConfig.setProxyHost(proxyHost);
         GlobalConfig.setProxyPort(proxyPort);
+        return ApiResponse.success();
+    }
+
+    @WebMapping("/set/ssh")
+    public ApiResponse<String> setSsh(String sshHost, String sshPort, String sshUser, String sshPassword, String sshSavePath){
+        GlobalConfig.setSshHost(sshHost);
+        GlobalConfig.setSshPort(sshPort);
+        GlobalConfig.setSshUser(sshUser);
+        GlobalConfig.setSshPassword(CryptoUtil.moduloDecrypt(sshPassword));
+        GlobalConfig.setSshSavePath(sshSavePath);
         return ApiResponse.success();
     }
 

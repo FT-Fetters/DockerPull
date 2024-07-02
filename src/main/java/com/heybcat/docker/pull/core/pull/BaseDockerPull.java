@@ -124,6 +124,7 @@ public class BaseDockerPull {
             SessionManager.getInstance().changeStatus(session, "finished");
         } catch (URISyntaxException | IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
+            log.error("pull image error", e);
             return new PullResult(false, e.getMessage());
         }
         return null;
