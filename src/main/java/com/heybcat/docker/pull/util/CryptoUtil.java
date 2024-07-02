@@ -70,35 +70,5 @@ public class CryptoUtil {
         return decryptedText.toString();
     }
 
-    public static String byteArrayToString(String str) {
-        StringBuilder byteArrayStr = new StringBuilder();
-        for (char c : str.toCharArray()) {
-            if (c == 0) {
-                byteArrayStr.append('_');
-            } else if (c == 1) {
-                byteArrayStr.append('+');
-            } else {
-                byteArrayStr.append((int) c);
-            }
-            byteArrayStr.append(' ');
-        }
-        return byteArrayStr.toString().trim();
-    }
-
-    public static String stringToByteArray(String byteArrayStr) {
-        String[] byteValues = byteArrayStr.split(" ");
-        StringBuilder originalStr = new StringBuilder();
-        for (String byteValue : byteValues) {
-            if ("_".equals(byteValue)) {
-                originalStr.append((char) 0);
-            } else if ("+".equals(byteValue)) {
-                originalStr.append((char) 1);
-            } else {
-                originalStr.append((char) Integer.parseInt(byteValue));
-            }
-        }
-        return originalStr.toString();
-    }
-
 
 }
