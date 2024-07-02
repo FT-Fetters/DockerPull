@@ -83,6 +83,8 @@ public class SftpUploader {
                         }
                     });
                 } catch (JSchException | SftpException | IOException e) {
+                    SessionManager.getInstance().setResult(session, e.getMessage());
+                    SessionManager.getInstance().changeStatus(session, "fail");
                     log.error("image upload fail", e);
                 }
             }
