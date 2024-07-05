@@ -16,6 +16,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.ldqc.tightcall.util.StringUtil;
@@ -55,6 +56,8 @@ public class SftpUploader {
                     channelSftp = buildChannelSftp(sshHost, Integer.valueOf(sshPort), sshUser, sshPassword);
                     channelSftp.cd(targetPath);
 
+                    final AtomicInteger lastProgress = new AtomicInteger(0);
+
                     channelSftp.put(fis, imageFile.getName(), new SftpProgressMonitor() {
                         private long transferred = 0;
 
@@ -70,9 +73,12 @@ public class SftpUploader {
                         public boolean count(long l) {
                             transferred += l;
                             double percent = ((double) transferred * 100) / fileSize;
-                            SessionManager.getInstance().updateProgress(session, percent);
-                            SessionManager.getInstance().changeStatus(session, "uploading");
-                            log.info("upload image {} to server {} path {} progress {}%", imageFile.getName(), sshHost, targetPath, percent);
+                            if (((int) percent) > lastProgress.get()){
+                                SessionManager.getInstance().updateProgress(session, percent);
+                                SessionManager.getInstance().changeStatus(session, "uploading");
+                                log.info("upload image {} to server {} path {} progress {}%", imageFile.getName(), sshHost, targetPath, percent);
+                                lastProgress.set((int) percent);
+                            }
                             return true;
                         }
 
