@@ -11,6 +11,15 @@ java -jar docker-pull.jar <image> <proxyUrl> <proxyPort>
 
 After the download and packaging are complete, you can find the downloaded image in the image directory under the jar package.
 
+Or you can use web page
+
+```shell
+java -jar docker-pull.jar --web
+```
+
+Open url http://localhost:1111
+
+Search your image and download then you can upload to you server
 ## Docker
 
 The extracted image is by default ending with .gz, and it needs to be changed to end with .tar.
