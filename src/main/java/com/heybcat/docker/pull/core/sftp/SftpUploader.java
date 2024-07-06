@@ -5,15 +5,21 @@ import com.heybcat.docker.pull.util.CryptoUtil;
 import com.heybcat.docker.pull.web.config.GlobalConfig;
 import com.heybcat.docker.pull.web.entity.view.UploadImageView;
 import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import com.jcraft.jsch.SftpProgressMonitor;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,7 +32,7 @@ import xyz.ldqc.tightcall.util.StringUtil;
  */
 public class SftpUploader {
 
-    private SftpUploader(){
+    private SftpUploader() {
         throw new UnsupportedOperationException();
     }
 
@@ -37,12 +43,12 @@ public class SftpUploader {
     );
     private static final Logger log = LoggerFactory.getLogger(SftpUploader.class);
 
-    public static UploadImageView upload(File imageFile, String targetPath){
+    public static UploadImageView upload(File imageFile, String targetPath) {
         String sshHost = GlobalConfig.getSshHost();
         String sshPort = GlobalConfig.getSshPort();
         String sshUser = GlobalConfig.getSshUser();
         String sshPassword = CryptoUtil.moduloDecrypt(GlobalConfig.getSshPassword());
-        if (StringUtil.isAnyBlank(sshHost, sshUser, sshPassword)){
+        if (StringUtil.isAnyBlank(sshHost, sshUser, sshPassword)) {
             return UploadImageView.fail("missing config");
         }
 
@@ -52,7 +58,7 @@ public class SftpUploader {
             () -> {
 
                 ChannelSftp channelSftp;
-                try(FileInputStream fis = new FileInputStream(imageFile)) {
+                try (FileInputStream fis = new FileInputStream(imageFile)) {
                     channelSftp = buildChannelSftp(sshHost, Integer.valueOf(sshPort), sshUser, sshPassword);
                     channelSftp.cd(targetPath);
 
@@ -73,10 +79,11 @@ public class SftpUploader {
                         public boolean count(long l) {
                             transferred += l;
                             double percent = ((double) transferred * 100) / fileSize;
-                            if (((int) percent) > lastProgress.get()){
+                            if (((int) percent) > lastProgress.get()) {
                                 SessionManager.getInstance().updateProgress(session, percent);
                                 SessionManager.getInstance().changeStatus(session, "uploading");
-                                log.info("upload image {} to server {} path {} progress {}%", imageFile.getName(), sshHost, targetPath, percent);
+                                log.info("upload image {} to server {} path {} progress {}%", imageFile.getName(),
+                                    sshHost, targetPath, percent);
                                 lastProgress.set((int) percent);
                             }
                             return true;
@@ -85,9 +92,16 @@ public class SftpUploader {
                         @Override
                         public void end() {
                             SessionManager.getInstance().changeStatus(session, "finished");
-                            log.info("upload image {} to server {} path {} finished", imageFile.getName(), sshHost, targetPath);
+                            log.info("upload image {} to server {} path {} finished", imageFile.getName(), sshHost,
+                                targetPath);
                         }
                     });
+
+                    if (GlobalConfig.getIsLoadImage()) {
+                        loadToDocker(targetPath, imageFile.getName(),
+                            buildChannelExec(sshHost, Integer.valueOf(sshPort), sshUser, sshPassword));
+                    }
+
                 } catch (JSchException | SftpException | IOException e) {
                     SessionManager.getInstance().setResult(session, e.getMessage());
                     SessionManager.getInstance().changeStatus(session, "fail");
@@ -95,11 +109,46 @@ public class SftpUploader {
                 }
             }
         );
-        return new UploadImageView(session,true, "uploading");
+        return new UploadImageView(session, true, "uploading");
+    }
+
+    private static void loadToDocker(String imagePath, String imageFileName, ChannelExec channelExec) {
+        channelExec.setCommand("docker load < " + imagePath + "/" + imageFileName);
+        channelExec.setErrStream(System.err);
+        channelExec.setInputStream(null);
+        try {
+            channelExec.connect();
+            InputStream input = channelExec.getInputStream();
+            BufferedReader inputReader = new BufferedReader(new InputStreamReader(input));
+            String inputLine;
+            while ((inputLine = inputReader.readLine()) != null) {
+                log.info("{}@{}> {}", GlobalConfig.getSshUser(), GlobalConfig.getSshHost(), inputLine);
+            }
+        } catch (IOException | JSchException e) {
+            log.error("load image to docker fail", e);
+        }
+
     }
 
 
     private static ChannelSftp buildChannelSftp(String sshHost, Integer sshPort, String sshUser, String sshPassword)
+        throws JSchException {
+        Session session = sshConnect(sshHost, sshPort, sshUser, sshPassword);
+
+        Channel channel = session.openChannel("sftp");
+        channel.connect();
+        return ((ChannelSftp) channel);
+    }
+
+    private static ChannelExec buildChannelExec(String sshHost, Integer sshPort, String sshUser, String sshPassword)
+        throws JSchException {
+        Session session = sshConnect(sshHost, sshPort, sshUser, sshPassword);
+
+        Channel channel = session.openChannel("exec");
+        return (ChannelExec) channel;
+    }
+
+    private static Session sshConnect(String sshHost, Integer sshPort, String sshUser, String sshPassword)
         throws JSchException {
         JSch jSch = new JSch();
         Session session = jSch.getSession(sshUser, sshHost, sshPort);
@@ -110,11 +159,7 @@ public class SftpUploader {
         session.setConfig(config);
 
         session.connect();
-
-        Channel channel = session.openChannel("sftp");
-        channel.connect();
-        return ((ChannelSftp) channel);
+        return session;
     }
-
 
 }

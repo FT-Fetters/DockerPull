@@ -32,6 +32,9 @@ public class GlobalConfig {
     @Config("sshSavePath")
     private static String sshSavePath;
 
+    @Config("isLoadImage")
+    private static String isLoadImage;
+
     public static String getProxyHost() {
         return proxyHost;
     }
@@ -95,5 +98,13 @@ public class GlobalConfig {
 
     public static void setSshSavePath(String sshSavePath) {
         GlobalConfig.sshSavePath = sshSavePath;
+    }
+
+    public static boolean getIsLoadImage() {
+        return isLoadImage.equals("true");
+    }
+
+    public static void setIsLoadImage(String isLoadImage) {
+        GlobalConfig.isLoadImage = isLoadImage;
     }
 }
