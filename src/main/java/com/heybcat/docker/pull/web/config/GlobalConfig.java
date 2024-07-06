@@ -1,6 +1,7 @@
 package com.heybcat.docker.pull.web.config;
 
 import com.heybcat.docker.pull.util.CryptoUtil;
+import xyz.ldqc.tightcall.util.StringUtil;
 
 /**
  * @author Fetters
@@ -76,11 +77,14 @@ public class GlobalConfig {
     }
 
     public static String getSshPassword() {
-        if (sshPassword.matches("^[_+]+$")){
-            return sshPassword;
-
+        if (StringUtil.isNotBlank(sshPassword)){
+            if (sshPassword.matches("^[_+]+$")){
+                return sshPassword;
+            }else {
+                return CryptoUtil.moduloEncrypt(sshPassword);
+            }
         }else {
-            return CryptoUtil.moduloEncrypt(sshPassword);
+            return "";
         }
     }
 
@@ -100,11 +104,15 @@ public class GlobalConfig {
         GlobalConfig.sshSavePath = sshSavePath;
     }
 
-    public static boolean getIsLoadImage() {
+    public static boolean isLoadImage() {
         return isLoadImage.equals("true");
     }
 
     public static void setIsLoadImage(String isLoadImage) {
         GlobalConfig.isLoadImage = isLoadImage;
+    }
+
+    public static String getIsLoadImage(){
+        return isLoadImage;
     }
 }
