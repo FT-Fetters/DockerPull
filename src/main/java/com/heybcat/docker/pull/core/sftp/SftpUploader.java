@@ -97,7 +97,7 @@ public class SftpUploader {
                         }
                     });
 
-                    if (GlobalConfig.getIsLoadImage()) {
+                    if (GlobalConfig.isLoadImage()) {
                         loadToDocker(targetPath, imageFile.getName(),
                             buildChannelExec(sshHost, Integer.valueOf(sshPort), sshUser, sshPassword));
                     }
