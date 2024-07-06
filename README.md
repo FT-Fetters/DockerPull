@@ -29,6 +29,10 @@ The extracted image is by default ending with .gz, and it needs to be changed to
 docker load < nginx_latest.tar
 ```
 
+## Contribute
+
+Thanks to [nimastudent](https://github.com/nimastudent) for the front-end support
+
 ## License
 
 MIT © [Fetters](LICENSE)
