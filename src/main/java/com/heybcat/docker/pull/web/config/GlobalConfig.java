@@ -105,7 +105,7 @@ public class GlobalConfig {
     }
 
     public static boolean isLoadImage() {
-        return isLoadImage.equals("true");
+        return StringUtil.isNotBlank(isLoadImage) && isLoadImage.equals("true");
     }
 
     public static void setIsLoadImage(String isLoadImage) {
