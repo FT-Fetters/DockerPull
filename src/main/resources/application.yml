@@ -1,0 +1,7 @@
+server:
+  port: 1111
+  resource:
+    enable: true
+    path: /web
+  web:
+    redirect: /->/web/index.html
