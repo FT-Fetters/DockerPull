@@ -6,3 +6,4 @@ sshUser:root
 sshPassword:xxxxxx
 sshSavePath:/home/test
 isLoadImage:true
+authKey:123456

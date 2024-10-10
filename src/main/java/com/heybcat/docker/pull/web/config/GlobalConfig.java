@@ -36,6 +36,9 @@ public class GlobalConfig {
     @Config("isLoadImage")
     private static String isLoadImage;
 
+    @Config("authKey")
+    private static String authKey;
+
     public static String getProxyHost() {
         return proxyHost;
     }
@@ -114,5 +117,13 @@ public class GlobalConfig {
 
     public static String getIsLoadImage(){
         return isLoadImage;
+    }
+
+    public static String getAuthKey() {
+        return authKey;
+    }
+
+    public static void setAuthKey(String authKey) {
+        GlobalConfig.authKey = authKey;
     }
 }
