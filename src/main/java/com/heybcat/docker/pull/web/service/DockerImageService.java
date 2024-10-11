@@ -38,6 +38,7 @@ public class DockerImageService {
 
     public String pull(String namespace, String image, String tag, String os, String arch) {
         String session = SessionManager.getInstance().newSession();
+        SessionManager.getInstance().changeStatus(session, "waiting");
         threadPoolExecutor.execute(
             () -> BaseDockerPull.pull(null, namespace, image, tag, os, arch,
                 GlobalConfig.getProxyHost(),
