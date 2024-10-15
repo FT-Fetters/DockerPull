@@ -39,6 +39,11 @@ The extracted image is by default ending with .gz, and it needs to be changed to
 docker load < nginx_latest.tar
 ```
 
+## Auth
+默认未开启密码校验，在配置文件config中添加`authKey:123456`即可
+
+default authKey is not enabled, add `authKey:123456` in config to enable
+
 ## 贡献 Contribute
 
 感谢 [nimastudent](https://github.com/nimastudent) 提供的前端页面支持
