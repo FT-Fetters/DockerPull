@@ -87,7 +87,7 @@ public class BaseDockerPull {
     ) {
 
         try {
-            String token = DockerAuth.token(namespace + SPLIT_CHAR + image, proxyUrl, proxyPort);
+            String token = DockerAuth.token(null, namespace + SPLIT_CHAR + image, proxyUrl, proxyPort);
 
             SessionManager.getInstance().changeStatus(session, "waiting");
             JSONObject manifests = getImageMainManifestByDefault(namespace, image, tag,

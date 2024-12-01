@@ -10,6 +10,7 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.ldqc.tightcall.util.StringUtil;
 
 /**
  * @author Fetters
@@ -18,8 +19,8 @@ public class DockerAuth {
 
     static final Logger log = LoggerFactory.getLogger(DockerAuth.class);
 
-    private static final String SERVICE = "registry.docker.io";
-    private static final String AUTH_URL = "https://auth.docker.io/token";
+    private static final String DEFAULT_SERVICE = "registry.docker.io";
+    private static final String DEFAULT_AUTH_URL = "auth.docker.io";
 
     private static final int SUCCESS_CODE = 200;
     private static final String IMG_TAG_SPLIT = ":";
@@ -30,8 +31,14 @@ public class DockerAuth {
         throw new UnsupportedOperationException();
     }
 
-    public static String token(String image, String proxyUrl, Integer proxyPort)
+    public static String token(String service, String image, String proxyUrl, Integer proxyPort)
         throws URISyntaxException, IOException, InterruptedException {
+        String authUrl = DEFAULT_AUTH_URL;
+        if (StringUtil.isBlank(service)){
+            service = DEFAULT_SERVICE;
+        }else {
+            authUrl = service;
+        }
         if (image == null || image.isEmpty()){
             log.info("image is null");
             return null;
@@ -39,7 +46,7 @@ public class DockerAuth {
 
         HttpClient httpClient = ClientBuilder.build(proxyUrl, proxyPort);
 
-        URI uri = new URI(buildAuthUrl(image));
+        URI uri = new URI(buildAuthUrl(authUrl, service, image));
 
         HttpRequest request = HttpRequest.newBuilder().uri(uri).build();
 
@@ -54,11 +61,12 @@ public class DockerAuth {
     }
 
 
-    private static String buildAuthUrl(String image){
+    private static String buildAuthUrl(String authUrl, String service, String image){
         if (image.contains(IMG_TAG_SPLIT)){
             image = image.split(IMG_TAG_SPLIT)[0];
         }
-        return AUTH_URL + "?service=" + SERVICE + "&scope=repository:" + image + ":pull";
+
+        return "https://" + authUrl + "/token?service=" + service + "&scope=repository:" + image + ":pull";
     }
 
 }
