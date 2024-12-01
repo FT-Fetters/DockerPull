@@ -18,5 +18,14 @@ public class TestStartup {
         }
     }
 
+    @Test
+    public void testCommand(){
+        try {
+            CommandStartup.main(new String[]{"bash:devel", "127.0.0.1", "7897"});
+        } catch (URISyntaxException | InvocationTargetException | NoSuchMethodException | IllegalAccessException |
+                 InterruptedException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

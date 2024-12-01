@@ -48,7 +48,7 @@ public class CommandDockerPull {
         if (!image.contains("/")){
             image = "library/" + image;
         }
-        String token = DockerAuth.token(image, proxyUrl, proxyPort);
+        String token = DockerAuth.token(null, image, proxyUrl, proxyPort);
         if (token == null || token.isEmpty()) {
             return;
         }
@@ -128,10 +128,10 @@ public class CommandDockerPull {
         String proxyUrl, Integer proxyPort,
         String token, String mediaType)
         throws IOException, InterruptedException {
-        HttpClient httpClient = ClientBuilder.build(proxyUrl, proxyPort);
+        HttpClient httpClient =  ClientBuilder.build(proxyUrl, proxyPort);
 
         if (mediaType == null) {
-            mediaType = "application/vnd.docker.distribution.manifest.v2+json";
+            mediaType = "application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.v2+json";
         }
         HttpRequest request = HttpRequest.newBuilder()
             .header("Authorization", "Bearer " + token)
