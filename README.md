@@ -7,6 +7,9 @@
 # proxyUrl 127.0.0.1
 # proxyPort 7890
 java -jar docker-pull.jar <image> <proxyUrl> <proxyPort>
+
+# pull other registry image
+java -jar docker-pull.jar ghcr.io/xx/xx:xx
 ```
 
 通过该命令在下载并打包完毕后，你可以在 jar 包目录下的images文件夹下找到镜像文件
