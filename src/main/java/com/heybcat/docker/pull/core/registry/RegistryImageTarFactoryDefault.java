@@ -84,8 +84,8 @@ public class RegistryImageTarFactoryDefault extends AbstractRegistryImageTarFact
     }
 
     private File outputTarFile() {
-        return new File(String.format("%s/images/%s.%s",
-            new File("").getAbsolutePath(), imageInfo.getFullImageName(), Constant.TAR_SUFFIX)
+        return new File(String.format("%s/images/%s_%s_%s.%s",
+            new File("").getAbsolutePath(), imageInfo.getFullImageName(), imageInfo.getOs(), imageInfo.getArch(), Constant.TAR_SUFFIX)
         );
     }
 

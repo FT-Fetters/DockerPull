@@ -13,7 +13,6 @@ import com.heybcat.docker.pull.core.log.DefaultPullLogger;
 import com.heybcat.docker.pull.core.log.IPullLogger;
 import com.heybcat.docker.pull.core.registry.RegistryHelper;
 import com.heybcat.docker.pull.core.registry.RegistryImageTarFactoryDefault;
-import com.heybcat.docker.pull.util.HttpUtil;
 import com.heybcat.docker.pull.util.SystemUtil;
 import java.io.File;
 import java.io.IOException;
@@ -119,6 +118,8 @@ public class RegistryImagePuller {
                     pullContext.setChosenManifest(manifest);
                     Manifests specifyManifest = RegistryHelper.getManifests(imageInfo, manifest.getDigest(), pullContext.getToken(), manifest.getMediaType());
                     pullContext.setSpecifyManifest(specifyManifest);
+                    imageInfo.setOs(manifest.getPlatform().getOs());
+                    imageInfo.setArch(manifest.getPlatform().getArchitecture());
                     return;
                 }catch (IOException | InterruptedException e){
                     Thread.currentThread().interrupt();
@@ -131,6 +132,8 @@ public class RegistryImagePuller {
             int choose = getConfigChoice(manifestList);
             Manifest manifest = manifestList.get(choose);
             pullContext.setChosenManifest(manifest);
+            imageInfo.setOs(manifest.getPlatform().getOs());
+            imageInfo.setArch(manifest.getPlatform().getArchitecture());
             try {
                 Manifests specifyManifest = RegistryHelper.getManifests(imageInfo, manifest.getDigest(), pullContext.getToken(), manifest.getMediaType());
                 pullContext.setSpecifyManifest(specifyManifest);
