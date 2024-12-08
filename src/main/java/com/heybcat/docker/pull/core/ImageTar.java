@@ -51,7 +51,9 @@ public class ImageTar {
 
         Path tarFilePath = Paths.get(
             new File("").getAbsolutePath() + "/images/" + imageName.
-                replace("/", "_").replace(IMG_TAG_SPLIT, "_") + ".tar.gz");
+                replace("/", "_").replace(IMG_TAG_SPLIT, "_")
+                + "_" + configDigest.split(IMG_TAG_SPLIT)[1]
+                + ".tar.gz");
         Files.createDirectories(tarFilePath.getParent());
 
         try (OutputStream fo = Files.newOutputStream(tarFilePath);

@@ -35,7 +35,9 @@ public class ImagePackager {
         String configDigest = config.getJSONObject("config").getString(DIGEST_FLAG);
 
         Path tarFilePath = Paths.get(
-            new File("").getAbsolutePath() + "/images/" + namespace + "_" + image + "_" + tag + ".tar.gz");
+            new File("").getAbsolutePath() + "/images/" + namespace + "_" + image + "_" + tag + "_" +
+                configDigest.split(IMG_TAG_SPLIT)[1]
+                + ".tar.gz");
         Files.createDirectories(tarFilePath.getParent());
 
         try (OutputStream fo = Files.newOutputStream(tarFilePath);

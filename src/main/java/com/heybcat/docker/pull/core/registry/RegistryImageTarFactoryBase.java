@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import xyz.ldqc.tightcall.util.StringUtil;
 
@@ -177,8 +176,8 @@ public class RegistryImageTarFactoryBase extends AbstractRegistryImageTarFactory
     }
 
     private File outputTarFile() {
-        return new File(String.format("%s/images/%s.%s",
-            new File("").getAbsolutePath(), imageInfo.getFullImageName(), Constant.TAR_SUFFIX)
+        return new File(String.format("%s/images/%s_%s_%s.%s",
+            new File("").getAbsolutePath(), imageInfo.getFullImageName(),imageInfo.getOs(), imageInfo.getArch(), Constant.TAR_SUFFIX)
         );
     }
 
