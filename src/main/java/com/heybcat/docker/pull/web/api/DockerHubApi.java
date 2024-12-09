@@ -43,14 +43,14 @@ public class DockerHubApi {
     }
 
     @WebMapping("/tags")
-    public ApiResponse<JSONObject> tags(String id, Integer from, Integer size)
+    public ApiResponse<JSONObject> tags(String id, Integer page, Integer size)
         throws IOException, InterruptedException {
         if (StringUtil.isBlank(id)){
             return ApiResponse.fail("miss image id");
         }
-        from = from == null ? 0 : from;
+        page = page == null ? 0 : page;
         size = size == null ? 10 : size;
-        JSONObject tags = dockerHubService.tags(id, from, size);
+        JSONObject tags = dockerHubService.tags(id, page, size);
         if (tags != null){
             return ApiResponse.success(tags);
         }else {
