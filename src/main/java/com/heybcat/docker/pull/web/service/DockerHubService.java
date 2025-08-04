@@ -87,11 +87,11 @@ public class DockerHubService {
         return new HubSearchView(resultViews, total, size);
     }
 
-    public JSONObject tags(String id, Integer from, Integer size)
+    public JSONObject tags(String id, Integer page, Integer size)
         throws IOException, InterruptedException {
         String tagsUri = String.format(
             "https://hub.docker.com/v2/repositories/%s/tags?page_size=%d&page=%d&ordering=last_updated&name="
-            ,id, size, from
+            ,id, size, page
         );
 
         HttpClient httpClient = getHttpClient();
