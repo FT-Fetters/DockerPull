@@ -117,7 +117,16 @@ public class RegistryImageTarFactoryDefault extends AbstractRegistryImageTarFact
 
             // append specify manifest file -> blobs/sha256/abc123xxx
             File specifyManifestFile = buildSpecifyManifestFile(tempDir);
-            TarUtil.appendFileToTar(tarOut, specifyManifestFile, "blobs/sha256/" + removeSharPrefix(manifest.getDigest()));
+            if (manifest == null) {
+                throw new IllegalStateException("Manifest cannot be null");
+            }
+            
+            String manifestDigest = manifest.getDigest();
+            if (manifestDigest == null || manifestDigest.isEmpty()) {
+                // For single manifest images, use config digest as fallback
+                manifestDigest = specifyManifest.getConfig().getDigest();
+            }
+            TarUtil.appendFileToTar(tarOut, specifyManifestFile, "blobs/sha256/" + removeSharPrefix(manifestDigest));
 
             // append config detail file -> blobs/sha256/123abc123xxx
             TarUtil.appendFileToTar(tarOut, configFile, "blobs/sha256/" + removeSharPrefix(specifyManifest.getConfig().getDigest()));
@@ -130,6 +139,7 @@ public class RegistryImageTarFactoryDefault extends AbstractRegistryImageTarFact
             tarOut.finish();
             return tarFile;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new ImageTarException("build image tar error");
         }
     }
