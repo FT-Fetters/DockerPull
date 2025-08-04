@@ -102,6 +102,11 @@ public class RegistryImagePuller {
         ImageInfo imageInfo = pullContext.getImageInfo();
         if (manifests.getManifestList() == null) {
             pullContext.setSpecifyManifest(manifests);
+            // For single manifest images, create a dummy manifest for chosenManifest
+            Manifest dummyManifest = new Manifest();
+            dummyManifest.setDigest(imageInfo.getDigest()); // This can be null, will be handled in tar factory
+            dummyManifest.setMediaType(manifests.getMediaType());
+            pullContext.setChosenManifest(dummyManifest);
             return;
         }
         List<Manifest> manifestList = pullContext.getManifests().getManifestList();
@@ -175,7 +180,15 @@ public class RegistryImagePuller {
         Manifests config = pullContext.getSpecifyManifest();
         AsyncBlob asyncBlob = RegistryHelper.transferBlobs(pullContext.getImageInfo(), config.getConfig().getDigest(), pullContext.getToken(), Constant.CONFIG_SUFFIX);
         asyncBlob.waitForDone(null, null);
-        pullContext.setConfigFile(asyncBlob.getBlobFile());
+        File configFile = asyncBlob.getBlobFile();
+        if (configFile == null) {
+            String errorMsg = "Failed to download config file for digest: " + config.getConfig().getDigest();
+            if (asyncBlob.hasError()) {
+                errorMsg += ". Error: " + asyncBlob.getErrorMessage();
+            }
+            throw new ImagePullException(errorMsg);
+        }
+        pullContext.setConfigFile(configFile);
     }
 
     private void downloadAllLayers(){
@@ -191,7 +204,17 @@ public class RegistryImagePuller {
             asyncBlob.waitForDone(null, log);
         }
         pullContext.setLayerFileList(new ArrayList<>());
-        asyncBlobList.forEach(blob -> pullContext.getLayerFileList().add(blob.getBlobFile()));
+        for (AsyncBlob blob : asyncBlobList) {
+            File layerFile = blob.getBlobFile();
+            if (layerFile == null) {
+                String errorMsg = "Failed to download layer file";
+                if (blob.hasError()) {
+                    errorMsg += ". Error: " + blob.getErrorMessage();
+                }
+                throw new ImagePullException(errorMsg);
+            }
+            pullContext.getLayerFileList().add(layerFile);
+        }
     }
 
     private static void assemblyImageTar(){

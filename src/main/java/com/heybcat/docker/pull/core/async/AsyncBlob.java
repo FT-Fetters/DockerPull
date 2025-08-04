@@ -35,6 +35,8 @@ public class AsyncBlob implements Runnable {
     private AtomicLong current;
 
     private volatile File file;
+    
+    private volatile String errorMessage;
 
     @Getter(AccessLevel.NONE)
     private final String digest;
@@ -59,12 +61,14 @@ public class AsyncBlob implements Runnable {
         try {
             HttpResponse<InputStream> resp = httpClient.send(blobRequest, BodyHandlers.ofInputStream());
             if (resp.statusCode() != Constant.STATUS_OK){
+                errorMessage = "HTTP request failed with status code: " + resp.statusCode();
                 done = true;
                 return;
             }
             HttpHeaders headers = resp.headers();
             long contentLength = headers.firstValueAsLong("Content-Length").orElse(-1);
             if (contentLength == -1) {
+                errorMessage = "Content-Length header is missing from response";
                 done = true;
                 return;
             }
@@ -93,6 +97,7 @@ public class AsyncBlob implements Runnable {
             file = getFile();
             done = true;
         } catch (IOException | InterruptedException e) {
+            errorMessage = "Download failed: " + e.getMessage();
             Thread.currentThread().interrupt();
             done = true;
         }
@@ -107,6 +112,10 @@ public class AsyncBlob implements Runnable {
 
     public File getBlobFile(){
         return file;
+    }
+    
+    public boolean hasError(){
+        return errorMessage != null;
     }
 
     public void waitForDone(Integer maxWaitTime, IPullLogger log){
